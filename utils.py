@@ -1,23 +1,3 @@
-def query_print_all(collection, query):
-    results = collection.find(query)
-    for entry in results:
-        print(entry)
-
-    return results
-
-
-def query_print_parameter(collection, my_query, param):
-    results = collection.find(my_query)
-    for entry in results:
-        print(entry[param])
-    return results
-
-def query_print_one(collection, query):
-    result = collection.find_one(query)
-    print(result.next())
-
-    return result
-
 def get_max_infl_year(collection, anno):
     """
     Estrae il paese che ha l'inflazione maggiore dato un anno.
@@ -54,9 +34,44 @@ def get_avg_infl_years(collection, country):
     ])
 
 
-def get_food_inflation_eur(db, europeanCountriesList):
+def get_avg_infl_eur(collection, europeanCountriesList):
+    """
+    Estrae l'inflazione dei paesi dell'UE eliminando le categorie e accorpando
+    le 5 categorie in unico valore calcolato con una media tra i 5.
+
+    :param collection: La collection di MongoDB
+    :param europeanCountriesList:
+    :return:
+    """
     # Creazione dell'array con gli anni di interesse
-    years = [str(year) for year in range(2002, 2023)]
+    years = [str(year) for year in range(1970, 2025)]
+
+    # Creazione del pipeline di aggregazione
+    pipeline = [
+        # Filtro per i paesi europei
+        {"$match": {"Country": {"$in": europeanCountriesList}}},
+        # Raggruppamento per paese e calcolo della media per ogni anno
+        {"$group": {
+            "_id": "$Country",
+            **{year: {"$avg": f"${year}"} for year in years}
+        }}
+    ]
+
+    # Esecuzione dell'aggregazione
+    result = collection.aggregate(pipeline)
+
+    return result
+
+
+def get_food_inflation_eur_per_year(collection, europeanCountriesList):
+    """
+    Estrae e fa una media del tasso di inflazione nel campo alimentare negli anni.
+    :param db:
+    :param europeanCountriesList:
+    :return:
+    """
+    # Creazione dell'array con gli anni di interesse
+    years = [str(year) for year in range(1970, 2023)]
 
     # Creazione del pipeline di aggregazione
     pipeline = [
@@ -70,26 +85,18 @@ def get_food_inflation_eur(db, europeanCountriesList):
     ]
 
     # Esecuzione dell'aggregazione
-    result = db.aggregate(pipeline)
+    result = collection.aggregate(pipeline)
 
-    # Creazione del dizionario per l'output
-    output = {}
-
-    # Riempimento del dizionario con i risultati
-    for doc in result:
-        doc.pop('_id')  # Rimuove la chiave '_id' non necessaria
-        output.update(doc)
-
-    return output
+    return result
 
 
-def get_eu_food_infl(collection, country_list):
+def get_eu_food_infl_countries(collection, country_list):
     """
-    Estrae la media, tra gli anni 1980 e 2024, dell'inflazione dei paesi dell'Unione Europea.
+    Estrae il tasso di inflazione nel campo alimentare dei paesi Europei.
 
     :param collection: La Collection di MongoDB
     :param country_list: La lista delle sigle dei paesi dell'Unione Europea
-    :return:           Un cursore che contiene il Documento MongoDB
+    :return:           Un cursore che contiene i Documenti MongoDB
     """
 
     query = {
@@ -97,10 +104,6 @@ def get_eu_food_infl(collection, country_list):
         "Series Name": "Food Consumer Price Inflation"
     }
     result = collection.find(query)
-
-    # Stampa dei risultati
-    for doc in result:
-        print(doc)
 
     return result
 
