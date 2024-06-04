@@ -3,17 +3,20 @@ def query_print_all(collection, query):
     for entry in results:
         print(entry)
 
+    return results
+
 
 def query_print_parameter(collection, my_query, param):
     results = collection.find(my_query)
     for entry in results:
         print(entry[param])
-
+    return results
 
 def query_print_one(collection, query):
     result = collection.find_one(query)
     print(result.next())
 
+    return result
 
 def get_max_infl_year(collection, anno):
     """
@@ -49,3 +52,57 @@ def get_avg_infl_years(collection, country):
             "avgInflation": {"$avg": [f"${a}" for a in anni]}
         }}
     ])
+
+
+def get_food_inflation_eur(db, europeanCountriesList):
+    # Creazione dell'array con gli anni di interesse
+    years = [str(year) for year in range(2002, 2023)]
+
+    # Creazione del pipeline di aggregazione
+    pipeline = [
+        # Filtro per i documenti con "Series Name" = "Food Consumer Price Inflation"
+        {"$match": {"Series Name": "Food Consumer Price Inflation"}},
+        # Raggruppamento per anno e calcolo della media per ogni anno
+        {"$group": {
+            "_id": None,
+            **{year: {"$avg": f"${year}"} for year in years}
+        }}
+    ]
+
+    # Esecuzione dell'aggregazione
+    result = db.aggregate(pipeline)
+
+    # Creazione del dizionario per l'output
+    output = {}
+
+    # Riempimento del dizionario con i risultati
+    for doc in result:
+        doc.pop('_id')  # Rimuove la chiave '_id' non necessaria
+        output.update(doc)
+
+    return output
+
+
+def get_eu_food_infl(collection, country_list):
+    """
+    Estrae la media, tra gli anni 1980 e 2024, dell'inflazione dei paesi dell'Unione Europea.
+
+    :param collection: La Collection di MongoDB
+    :param country_list: La lista delle sigle dei paesi dell'Unione Europea
+    :return:           Un cursore che contiene il Documento MongoDB
+    """
+
+    query = {
+        "Country Code": {"$in": country_list},
+        "Series Name": "Food Consumer Price Inflation"
+    }
+    result = collection.find(query)
+
+    # Stampa dei risultati
+    for doc in result:
+        print(doc)
+
+    return result
+
+
+
