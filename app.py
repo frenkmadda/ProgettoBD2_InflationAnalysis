@@ -1,66 +1,55 @@
 import pymongo
 from flask import Flask, render_template, send_from_directory, Response
 from markupsafe import escape
-from waitress import serve
 
 import utils
 
-app = Flask("GUI Progetto")
-app.jinja_env.add_extension('jinja2.ext.loopcontrols')
-client = pymongo.MongoClient("mongodb://localhost:27017/")
-db = client["ProgettoBD2"]
+app = Flask('GUI Progetto')
+app.jinja_env.add_extension('jinja2.ext.loopcontrols')  # Per aggiungere il break nei loop
 
 
-def main() -> None:
-    debug = True  # TODO: cambia o rimuovi
-    if debug:
-        app.run(host='0.0.0.0', port=5000, debug=True)
-    else:
-        serve(app, host='0.0.0.0', port=5000)
+@app.route('/')
+def serve_index() -> str:
+    return render_template('index.html')
 
 
-@app.route("/")
-def serve_index() -> Response:
-    return serve_html("index.html")
-
-
-@app.route("/prova")
+@app.route('/prova')
 def serve_prova() -> str:
-    food = db["food"]
-    query = {"High": {"$gt": 50}}
+    query = {'High': {'$gt': 50}}
     result = food.find(query)
-    data = dict((record["_id"], record) for record in result)
+    data = dict((record['_id'], record) for record in result)
     for key in data.keys():
-        del data[key]["_id"]
-    return render_template("prova.html", data=data)
+        del data[key]['_id']
+    return render_template('prova.html', data=data)
 
 
-@app.route("/<path>")
-def serve_html(path: str) -> Response:
-    if not path.endswith(".html"):
-        path += ".html"
-    return send_from_directory("templates", escape(path))
-
-
-@app.get("/js/<path>")
+@app.get('/js/<path>')
 def serve_js(path: str) -> Response:
-    return send_from_directory("templates/js", escape(path))
+    return send_from_directory('static/js', escape(path))
 
 
-@app.get("/css/<path>")
+@app.get('/css/<path>')
 def serve_css(path: str) -> Response:
-    return send_from_directory("templates/css", escape(path))
+    return send_from_directory('static/css', escape(path))
 
 
-@app.get("/favicon.ico")
+@app.get('/favicon.ico')
 def serve_favicon() -> Response:
-    return send_from_directory("templates", "favicon.ico", mimetype="image/vnd.microsoft.icon")
+    return send_from_directory('static', 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
 @app.errorhandler(404)
-def page_not_found(e) -> (Response, int):
-    return serve_html("404.html"), 404
+def page_not_found(e) -> Response:
+    return send_from_directory('static', '404.html')
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    client = pymongo.MongoClient('mongodb://localhost:27017/')
+    db = client['ProgettoBD2']
+
+    food = db['food']
+    global_dataset = db['global_dataset']
+    global_inflation = db['global_inflation']
+    us_cpi = db['consumer_price_index']
+
+    app.run(host='0.0.0.0', port=5000, debug=True)
