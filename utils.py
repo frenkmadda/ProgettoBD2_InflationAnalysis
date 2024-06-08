@@ -39,7 +39,7 @@ def get_avg_infl_eur(collection, europeanCountriesList):
     Estrae l'inflazione dei paesi dell'UE eliminando le categorie e accorpando
     le 5 categorie in unico valore calcolato con una media tra i 5.
 
-    :param collection: La collection di MongoDB
+    :param collection:            La Collection di MongoDB
     :param europeanCountriesList:
     :return:
     """
@@ -66,6 +66,7 @@ def get_avg_infl_eur(collection, europeanCountriesList):
 def get_food_inflation_eur_per_year(collection, europeanCountriesList):
     """
     Estrae e fa una media del tasso di inflazione nel campo alimentare negli anni.
+
     :param db:
     :param europeanCountriesList:
     :return:
@@ -94,9 +95,9 @@ def get_eu_food_infl_countries(collection, country_list):
     """
     Estrae il tasso di inflazione nel campo alimentare dei paesi Europei.
 
-    :param collection: La Collection di MongoDB
+    :param collection:   La Collection di MongoDB
     :param country_list: La lista delle sigle dei paesi dell'Unione Europea
-    :return:           Un cursore che contiene i Documenti MongoDB
+    :return:             Un cursore che contiene i Documenti MongoDB
     """
 
     query = {
@@ -106,6 +107,3 @@ def get_eu_food_infl_countries(collection, country_list):
     result = collection.find(query)
 
     return result
-
-
-

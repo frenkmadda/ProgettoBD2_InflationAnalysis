@@ -5,7 +5,7 @@ from markupsafe import escape
 import utils
 
 app = Flask('GUI Progetto')
-app.jinja_env.add_extension('jinja2.ext.loopcontrols')  # Per aggiungere il break nei loop
+app.jinja_env.add_extension('jinja2.ext.loopcontrols')  # Aggiunge funzioni extra ai cicli, come il break
 
 
 @app.route('/')
