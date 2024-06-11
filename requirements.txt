@@ -1,4 +1,5 @@
-flask~=3.0.0
-matplotlib~=3.9.0
-plotly~=5.22.0
-pymongo~=4.7.0
+flask~=3.0
+matplotlib~=3.9
+plotly~=5.22
+pycountry~=24.6
+pymongo~=4.7

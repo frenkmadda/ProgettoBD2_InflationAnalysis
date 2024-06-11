@@ -3,6 +3,7 @@ from html import escape
 
 import plotly
 import plotly.graph_objs as go
+import pycountry
 import pymongo
 from flask import Flask, render_template, send_from_directory, Response, request
 
@@ -29,14 +30,26 @@ def serve_prova() -> str:
 
 @app.route('/inflation-by-country', methods=['GET', 'POST'])
 def serve_ibc() -> str:
-    countries = ["Italy", "France"]
-    country = "Italy"
+    countries = global_inflation.distinct('country_name')
     if request.method == 'POST':
         country = request.form['country']
         inflation_values, years = utils.get_inflation_by_country(global_inflation, country)
-        return render_template('inflation-by-country.html', countries=countries)
+        # Creazione del grafico
+        data = [
+            go.Scatter(
+                x=inflation_values,
+                y=years,
+                mode='lines+markers',
+                name='Inflazione annuale'
+            )
+        ]
+
+        ccode = pycountry.countries.get(name=country).alpha_2
+        graph_json = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
+        return render_template('inflation-by-country.html', countries=countries, graphJSON=graph_json,
+                               paese=country, ccode=ccode)
     else:
-        return render_template('inflation-by-country.html', countries=countries)
+        return render_template('inflation-by-country.html', countries=countries, graphJSON='null')
 
 
 @app.route('/eu')

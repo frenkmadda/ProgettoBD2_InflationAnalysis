@@ -4,19 +4,47 @@
 <body>
 {% include "navbar.html" %}
 <div class="container">
-    <h3>Inflazione annuale nell'Unione Europea</h3>
-    <form method="POST" action="/inflation-by-country">
-    <div class="form-group">
-        <label for="countrySelect">Select Country</label>
-        <select class="form-control" id="countrySelect" name="country">
+    <h3>Inflazione annua per Paese</h3>
+    <form method="POST" action="/inflation-by-country" id="countryForm">
+    <div class="form-group my-3">
+        <label for="countrySelect">Seleziona il Paese</label>
+        <input class="form-control" id="countrySelect" name="country" list="countries" required>
+        <datalist id="countries">
             {% for country in countries %}
-                <option value="{{ country }}">{{ country }}</option>
+                <option value="{{ country }}">
             {% endfor %}
-        </select>
+        </datalist>
     </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="submit" class="btn btn-primary">Invia</button>
     </form>
+    <script>
+        document.getElementById('countryForm').addEventListener('submit', function(event) {
+            var input = document.getElementById('countrySelect');
+            var list = document.getElementById('countries');
+            var options = Array.from(list.options).map(function(option) {
+                return option.value;
+            });
+            if (!options.includes(input.value)) {
+                alert('Per favore, inserisci un paese valido.');
+                event.preventDefault();
+            }
+        });
+    </script>
+
+    <p id="mes"></p>
+    <img id="flag">
     <div id="graph"></div>
+    <script defer>
+        document.addEventListener("DOMContentLoaded", (event) => {
+            var graphs = {{ graphJSON | safe }};
+            if (!graphs)
+                return;
+
+            Plotly.newPlot('graph', graphs, {});
+            document.getElementById('mes').innerHTML = "Inflazione annua di: {{ paese }}";
+            document.getElementById('flag').src = "https://flagsapi.com/{{ccode}}/shiny/64.png";
+        });
+    </script>
 </div>
 </body>
 </html>
