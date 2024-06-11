@@ -1,0 +1,22 @@
+{% with title="Inflazione annua per Paese" %}
+{% include "head.html" %}
+{% endwith %}
+<body>
+{% include "navbar.html" %}
+<div class="container">
+    <h3>Inflazione annuale nell'Unione Europea</h3>
+    <form method="POST" action="/inflation-by-country">
+    <div class="form-group">
+        <label for="countrySelect">Select Country</label>
+        <select class="form-control" id="countrySelect" name="country">
+            {% for country in countries %}
+                <option value="{{ country }}">{{ country }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    <div id="graph"></div>
+</div>
+</body>
+</html>

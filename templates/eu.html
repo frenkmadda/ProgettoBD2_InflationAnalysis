@@ -1,0 +1,18 @@
+{% with title="Test" %}
+{% include "head.html" %}
+{% endwith %}
+<body>
+{% include "navbar.html" %}
+<div class="container">
+    <h3>Inflazione annuale nell'Unione Europea</h3>
+    <div id="graph"></div>
+
+    <script defer>
+        document.addEventListener("DOMContentLoaded", (event) => {
+            var graphs = {{ graphJSON | safe }};
+            Plotly.newPlot('graph', graphs, {});
+        });
+    </script>
+</div>
+</body>
+</html>
