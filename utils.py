@@ -107,3 +107,24 @@ def get_eu_food_infl_countries(collection, country_list):
     result = collection.find(query)
 
     return result
+
+def get_inflation_by_country(dataset, country_name):
+    '''
+    Estrae gli anni e i valori di inflazione per il paese specificato.
+    :param dataset: Dataset global_inflation
+    :param country_name: Nome del paese
+    :return: anni e valori di inflazione
+    '''
+    # Estrazione dei dati di inflazione per il paese specificato
+    country_data = dataset.find_one({"country_name": country_name})
+
+    # Rimozione dei campi non necessari
+    country_data.pop('_id')
+    country_data.pop('country_name')
+    country_data.pop('indicator_name')
+
+    # Estrazione degli anni e dei valori di inflazione
+    years = list(country_data.keys())
+    inflation_values = list(country_data.values())
+
+    return years, inflation_values
