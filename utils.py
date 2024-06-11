@@ -6,6 +6,7 @@ def get_max_infl_year(collection, anno):
     :param anno:       L'anno da cercare
     :return:           Un cursore che contiene il Documento MongoDB
     """
+    anno = int(anno)
     if anno < 1980 or anno > 2024:
         raise ValueError("L'anno deve essere compreso tra il 1980 e il 2024!")
 

@@ -52,8 +52,34 @@ def serve_ibc() -> str:
         return render_template('inflation-by-country.html', countries=countries, graphJSON='null')
 
 
+@app.route('/max-inflation', methods=['GET', 'POST'])
+def serve_max_inflation() -> str:
+    if request.method == 'POST':
+        year = request.form['year']
+        result = utils.get_max_infl_year(global_inflation, year)
+        documents = list(result)
+        country = None
+        output = {}
+
+        if documents:
+            country_max_infl = global_inflation.find_one({"_id": documents[0]['_id']})
+            if country_max_infl:
+                country = country_max_infl['country_name']
+
+        # Riempimento del dizionario con i risultati
+        for doc in result:
+            doc.pop('_id')  # Rimuove la chiave '_id' non necessaria
+            output.update(doc)
+        inflation_value = list(output.values())[0] if output else None
+        ccode = pycountry.countries.get(name=country).alpha_2
+
+        return render_template('max-inflation.html', inflation_value=inflation_value, country=country, year=year, ccode=ccode)
+    else:
+        return render_template('max-inflation.html')
+
+
 @app.route('/eu')
-def serve_test() -> str:
+def serve_eu() -> str:
     query = {"Country Code": {
         "$in": ["AUT", "BEL", "BGR", "HRV", "CYP", "CZE", "DNK", "EST", "FIN", "FRA", "DEU", "GRC", "HUN", "IRL", "ITA",
                 "LVA", "LTU", "LUX", "MLT", "NLD", "POL", "PRT", "ROU", "SVK", "SVN", "ESP", "SWE"]}}
