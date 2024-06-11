@@ -4,7 +4,47 @@
 <body>
 {% include "navbar.html" %}
 <div class="container">
-    <p>Test</p>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Inflazione massima</h5>
+                    <p class="card-text">Trova la nazione con inflazione massima per un determinato anno.</p>
+                    <a href="/max-inflation" class="btn btn-primary">Vai a Inflazione massima</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Inflazione per paese</h5>
+                    <p class="card-text">Visualizza l'inflazione annuale di un determinato paese.</p>
+                    <a href="/inflation-by-country" class="btn btn-primary">Vai a Inflazione per paese</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Inflazione Europea</h5>
+                    <p class="card-text">Visualizza l'inflazione annuale nei paesi dell'Unione Europea.</p>
+                    <a href="/eu" class="btn btn-primary">Vai a Inflazione Europea</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Inflazione media</h5>
+                    <p class="card-text">Visualizza l'inflazione media di un determinato paese.</p>
+                    <a href="/mean" class="btn btn-primary">Vai a Inflazione media</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 </body>
 </html>

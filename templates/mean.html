@@ -1,11 +1,11 @@
-{% with title="Inflazione annua per Paese" %}
+{% with title="Paese con inflazione massima" %}
 {% include "head.html" %}
 {% endwith %}
 <body>
 {% include "navbar.html" %}
 <div class="container">
-    <h3>Inflazione annua per Paese</h3>
-    <form method="POST" action="/inflation-by-country" id="countryForm">
+    <h3 class="mt-4">Inflazione media per Paese</h3>
+    <form method="POST" action="/mean" id="countryForm">
     <div class="form-group my-3">
         <label for="countrySelect">Seleziona il Paese</label>
         <input class="form-control" id="countrySelect" name="country" list="countries" required>
@@ -38,23 +38,12 @@
             }
         });
     </script>
-
+    {% if inflation_value %}
     <div id="msg-div">
-        <h4 id="mes"></h4>
-        <img id="flag">
+        <h4>La media dell'inflazione dal 1980 al 2024 di {{ paese }} è {{ inflation_value }}%</h4>
+        {% if ccode %}<img id="flag" src="https://flagsapi.com/{{ccode}}/shiny/64.png">{% endif %}
     </div>
-    <div id="graph"></div>
-    <script defer>
-        document.addEventListener("DOMContentLoaded", (event) => {
-            var graphs = {{ graphJSON | safe }};
-            if (!graphs)
-                return;
-
-            Plotly.newPlot('graph', graphs, {});
-            document.getElementById('mes').innerText = "Inflazione annua di: {{ paese }}";
-            {% if ccode %}document.getElementById('flag').src = "https://flagsapi.com/{{ccode}}/shiny/64.png";{% endif %}
-        });
-    </script>
+    {%endif%}
 </div>
 </body>
 </html>

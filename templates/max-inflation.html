@@ -12,11 +12,12 @@
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
-        <p class="mt-2">Anno selezionato: {{year}}</p>
-         {% if ccode %}
-            <img id="flag" src="https://flagsapi.com/{{ccode}}/shiny/64.png">
-         {%endif%}
-        <h4 class="mt-4">Paese con inflazione massima: {{country}}</h4>
+    {% if country %}
+        <div id="msg-div">
+            <h4>Paese con inflazione massima nel {{year}}: {{country}} ({{ inflation_value }}%)</h4>
+            {% if ccode %}<img id="flag" src="https://flagsapi.com/{{ccode}}/shiny/64.png">{%endif%}
+        </div>
+    {%endif%}
 </div>
 </body>
 </html>

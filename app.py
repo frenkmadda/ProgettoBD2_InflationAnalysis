@@ -30,7 +30,6 @@ def serve_prova() -> str:
 
 @app.route('/inflation-by-country', methods=['GET', 'POST'])
 def serve_ibc() -> str:
-    countries = global_inflation.distinct('country_name')
     if request.method == 'POST':
         country = request.form['country']
         inflation_values, years = utils.get_inflation_by_country(global_inflation, country)
@@ -44,7 +43,7 @@ def serve_ibc() -> str:
             )
         ]
 
-        ccode = pycountry.countries.get(name=country).alpha_2
+        ccode = get_ccode(country)
         graph_json = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
         return render_template('inflation-by-country.html', countries=countries, graphJSON=graph_json,
                                paese=country, ccode=ccode)
@@ -61,21 +60,25 @@ def serve_max_inflation() -> str:
         country = None
         output = {}
 
-        if documents:
-            country_max_infl = global_inflation.find_one({"_id": documents[0]['_id']})
-            if country_max_infl:
-                country = country_max_infl['country_name']
-
-        # Riempimento del dizionario con i risultati
-        for doc in result:
-            doc.pop('_id')  # Rimuove la chiave '_id' non necessaria
-            output.update(doc)
-        inflation_value = list(output.values())[0] if output else None
-        ccode = pycountry.countries.get(name=country).alpha_2
+        country_max_infl = global_inflation.find_one({"_id": documents[0]['_id']})
+        country = country_max_infl['country_name']
+        inflation_value = country_max_infl[year]
+        ccode = get_ccode(country)
 
         return render_template('max-inflation.html', inflation_value=inflation_value, country=country, year=year, ccode=ccode)
     else:
         return render_template('max-inflation.html')
+
+
+@app.route('/mean', methods=['GET', 'POST'])
+def serve_mean() -> str:
+    if request.method == 'POST':
+        country = request.form['country']
+        inflation_value = utils.get_avg_infl_years(global_inflation, country).next()['avgInflation']
+        ccode = get_ccode(country)
+        return render_template('mean.html', countries=countries, inflation_value=round(inflation_value,2), paese=country, ccode=ccode)
+    else:
+        return render_template('mean.html', countries=countries, inflation_value=None)
 
 
 @app.route('/eu')
@@ -129,6 +132,13 @@ def page_not_found(e) -> Response:
     return send_from_directory('static', '404.html')
 
 
+def get_ccode(country: str):
+    try:
+        return pycountry.countries.search_fuzzy(country)[0].alpha_2
+    except LookupError:
+        return None
+
+
 if __name__ == '__main__':
     client = pymongo.MongoClient('mongodb://localhost:27017/')
     db = client['ProgettoBD2']
@@ -138,4 +148,5 @@ if __name__ == '__main__':
     global_inflation = db['global_inflation']
     us_cpi = db['consumer_price_index']
 
+    countries = global_inflation.distinct('country_name')
     app.run(host='0.0.0.0', port=5000, debug=True)
