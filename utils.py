@@ -129,3 +129,67 @@ def get_inflation_by_country(dataset, country_name):
     inflation_values = list(country_data.values())
 
     return years, inflation_values
+
+
+def insert_into_collection(collection, country_name, inflation_value, year):
+    """
+    Inserisce un documento in una Collection di MongoDB.
+    :param collection: La collection mongoDB
+    :param document: Il documento da inserire
+    :return: ritorna il cursor del documento inserito
+    """
+    if year not in range(1980, 2025):
+        raise ValueError("L'anno deve essere compreso tra il 1980 e il 2024!")
+
+    if collection.name == "global_inflation":
+        param= "country_name"
+    elif collection.name == "global_dataset":
+        param = "Country"
+    elif collection.name == "food":
+        param = "country"
+    else:
+        raise ValueError("La collection non è valida")
+
+    document = {
+        param: country_name,
+        "inflation_value": inflation_value,
+        "year": year
+    }
+
+
+    result = collection.insert_one(document)
+    return result
+
+def delete_from_global_inflation(collection, country_name):
+    """
+    Elimina un documento dalla Collection global_inflation.
+    :param collection: La collection mongoDB
+    :param country_name: Nome del paese
+    :return: ritorna il numero di documenti eliminati
+    """
+    result = collection.delete_one({"country_name": country_name})
+    return result.deleted_count
+
+
+def delete_from_global_dataset(collection, country_name, year):
+    """
+    Elimina un documento dalla Collection global_dataset.
+    :param collection: La collection mongoDB
+    :param country_name: Nome del paese
+    :param year: Anno
+    :return: ritorna il numero di documenti eliminati
+    """
+    result = collection.delete_one({"Country": country_name, "Year": year})
+    return result.deleted_count
+
+
+def delete_from_food(collection, country_name):
+    """
+    Elimina un documento dalla Collection food.
+    :param collection: La collection mongoDB
+    :param country_name: Nome del paese
+    :return: ritorna il numero di documenti eliminati
+    """
+    result = collection.delete_one({"country": country_name})
+    return result.deleted_count
+
