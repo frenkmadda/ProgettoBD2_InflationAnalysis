@@ -109,6 +109,7 @@ def get_eu_food_infl_countries(collection, country_list):
 
     return result
 
+
 def get_inflation_by_country(dataset, country_name):
     '''
     Estrae gli anni e i valori di inflazione per il paese specificato.
@@ -135,7 +136,9 @@ def insert_into_collection(collection, country_name, inflation_value, year):
     """
     Inserisce un documento in una Collection di MongoDB.
     :param collection: La collection mongoDB
-    :param document: Il documento da inserire
+    :param country_name: Il nome del paese da inserire
+    :param inflation_value: Il valore dell'inflazione da inserire
+    :param year: L'anno da inserire
     :return: ritorna il cursor del documento inserito
     """
     if year not in range(1980, 2025):
@@ -156,40 +159,31 @@ def insert_into_collection(collection, country_name, inflation_value, year):
         "year": year
     }
 
-
     result = collection.insert_one(document)
     return result
 
-def delete_from_global_inflation(collection, country_name):
+
+def delete_from_collection(collection, country_name):
     """
-    Elimina un documento dalla Collection global_inflation.
+    Elimina i documenti nella collection relativi al paese passato.
     :param collection: La collection mongoDB
     :param country_name: Nome del paese
     :return: ritorna il numero di documenti eliminati
     """
-    result = collection.delete_one({"country_name": country_name})
+
+    if collection.name == "global_inflation":
+        param = "country_name"
+    elif collection.name == "global_dataset":
+        param = "Country"
+    elif collection.name == "food":
+        param = "country"
+    else:
+        raise ValueError("La collection non è valida")
+
+    result = collection.delete_many({param: country_name})
     return result.deleted_count
 
 
-def delete_from_global_dataset(collection, country_name, year):
-    """
-    Elimina un documento dalla Collection global_dataset.
-    :param collection: La collection mongoDB
-    :param country_name: Nome del paese
-    :param year: Anno
-    :return: ritorna il numero di documenti eliminati
-    """
-    result = collection.delete_one({"Country": country_name, "Year": year})
-    return result.deleted_count
 
 
-def delete_from_food(collection, country_name):
-    """
-    Elimina un documento dalla Collection food.
-    :param collection: La collection mongoDB
-    :param country_name: Nome del paese
-    :return: ritorna il numero di documenti eliminati
-    """
-    result = collection.delete_one({"country": country_name})
-    return result.deleted_count
 

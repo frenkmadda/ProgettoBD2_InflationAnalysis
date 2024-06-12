@@ -112,6 +112,56 @@ def serve_eu() -> str:
     return render_template('eu.html', graphJSON=graph_json)
 
 
+@app.route('/insert', methods=['POST'])
+def serve_insert():
+    data = request.get_json()
+
+    collection_name = data.get('collection_name')
+    country_name = data.get('country_name')
+    inflation_value = data.get('inflation_value')
+    year = data.get('year')
+
+    if collection_name == 'global_inflation':
+        collection = global_inflation
+    elif collection_name == 'food':
+        collection = food
+    elif collection_name == 'global_dataset':
+        collection = global_dataset
+    else:
+        return {"error": "Invalid collection name"}, 400
+
+    result = utils.insert_into_collection(collection, country_name, inflation_value, year)
+
+    if result.acknowledged:
+        return {"message": "Document inserted successfully"}, 200
+    else:
+        return {"error": "Failed to insert document"}, 500
+
+
+@app.route('/delete', methods=['DELETE'])
+def delete_document():
+    data = request.get_json()
+
+    collection_name = data.get('collection_name')
+    country_name = data.get('country_name')
+
+    if collection_name == 'global_inflation':
+        collection = global_inflation
+    elif collection_name == 'food':
+        collection = food
+    elif collection_name == 'global_dataset':
+        collection = global_dataset
+    else:
+        return {"error": "Invalid collection name"}, 400
+
+    result = utils.delete_from_collection(collection, country_name)
+
+    if result > 0:
+        return {"message": "Document deleted successfully"}, 200
+    else:
+        return {"error": "Failed to delete document or document does not exist"}, 500
+
+
 @app.get('/js/<path>')
 def serve_js(path: str) -> Response:
     return send_from_directory('static/js', escape(path))
@@ -150,3 +200,4 @@ if __name__ == '__main__':
 
     countries = global_inflation.distinct('country_name')
     app.run(host='0.0.0.0', port=5000, debug=True)
+
