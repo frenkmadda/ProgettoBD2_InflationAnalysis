@@ -1,4 +1,4 @@
-from matplotlib import pyplot as plt
+from bson.objectid import ObjectId
 
 
 def get_max_infl_year(collection, anno):
@@ -163,18 +163,45 @@ def insert_into_collection(collection, country_name, inflation_value, year):
     }
 
     result = collection.insert_one(document)
-    return result
+    return result.inserted_id
 
 
-def delete_document(collection, document):
+def delete_document(collection, id):
     """
     Cancella un documento da una collection
     :param collection: La collection MongoDB
-    :param document: Il document da eliminare
+    :param id: L'id del documento da cancellare
     :return: Il risultato dell'operazione
     """
+    query = {"_id": ObjectId(id)}
+    result = collection.delete_one(query)
+    return result
 
-    result = collection.delete_one(document)
+
+def find_by_id(collection, id):
+    """
+    Trova un documento in una collection dato il suo id
+    :param collection: La collection MongoDB
+    :param id: L'id del documento da cercare
+    :return: il risultato dell'operazione come cursore
+    """
+    query = {"_id": ObjectId(id)}
+    result = collection.find_one(query)
+
+    return result
+
+
+def update_document(collection, id, document):
+    """
+    Aggiorna un documento in una collection
+    :param collection: La collection MongoDB
+    :param id: L'id del documento da aggiornare
+    :param document: Il documento con i nuovi valori
+    :return: Il risultato dell'operazione
+    """
+    query = {"_id": ObjectId(id)}
+    new_values = {"$set": document}
+    result = collection.update_one(query, new_values)
     return result
 
 
