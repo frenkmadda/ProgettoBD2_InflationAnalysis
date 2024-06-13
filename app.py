@@ -18,26 +18,59 @@ def serve_index() -> str:
     return render_template('index.html')
 
 
-@app.route('/prova')
-def serve_prova() -> str:
-    query = {'High': {'$gt': 50}}
-    result = food.find(query)
+@app.get('/crud')
+def serve_crud() -> str:
+    result = food.find({})
     data = dict((record['_id'], record) for record in result)
     for key in data.keys():
         del data[key]['_id']
-    return render_template('prova.html', data=data)
+    return render_template('crud.html', data=data, collection='food')
+
+
+@app.post('/crud')
+def crud_change_collection() -> (str, int):
+    collection_name = request.form['collection']
+    if collection_name == 'global_inflation':
+        collection = global_inflation
+    elif collection_name == 'food':
+        collection = food
+    elif collection_name == 'global_dataset':
+        collection = global_dataset
+    else:
+        return render_template('error.html', message='Invalid collection name', error='400 | Bad Request'), 400
+
+    result = collection.find({})
+    data = dict((record['_id'], record) for record in result)
+    for key in data.keys():
+        del data[key]['_id']
+    return render_template('crud.html', data=data, collection=collection_name), 200
+
+
+@app.route('/crud/create')
+def serve_create() -> str:
+    return render_template('create.html')
+
+
+@app.route('/crud/update')
+def serve_update() -> str:
+    return render_template('update.html')
+
+
+@app.route('/crud/delete')
+def serve_delete() -> str:
+    return render_template('delete.html')
 
 
 @app.route('/inflation-by-country', methods=['GET', 'POST'])
 def serve_ibc() -> str:
     if request.method == 'POST':
         country = request.form['country']
-        inflation_values, years = utils.get_inflation_by_country(global_inflation, country)
+        years, inflation_values = utils.get_inflation_by_country(global_inflation, country)
         # Creazione del grafico
         data = [
             go.Scatter(
-                x=inflation_values,
-                y=years,
+                x=years,
+                y=inflation_values,
                 mode='lines+markers',
                 name='Inflazione annuale'
             )
@@ -65,7 +98,8 @@ def serve_max_inflation() -> str:
         inflation_value = country_max_infl[year]
         ccode = get_ccode(country)
 
-        return render_template('max-inflation.html', inflation_value=inflation_value, country=country, year=year, ccode=ccode)
+        return render_template('max-inflation.html', inflation_value=inflation_value, country=country, year=year,
+                               ccode=ccode)
     else:
         return render_template('max-inflation.html')
 
@@ -76,7 +110,8 @@ def serve_mean() -> str:
         country = request.form['country']
         inflation_value = utils.get_avg_infl_years(global_inflation, country).next()['avgInflation']
         ccode = get_ccode(country)
-        return render_template('mean.html', countries=countries, inflation_value=round(inflation_value,2), paese=country, ccode=ccode)
+        return render_template('mean.html', countries=countries, inflation_value=round(inflation_value, 2),
+                               paese=country, ccode=ccode)
     else:
         return render_template('mean.html', countries=countries, inflation_value=None)
 
@@ -112,56 +147,6 @@ def serve_eu() -> str:
     return render_template('eu.html', graphJSON=graph_json)
 
 
-@app.route('/insert', methods=['POST'])
-def serve_insert():
-    data = request.get_json()
-
-    collection_name = data.get('collection_name')
-    country_name = data.get('country_name')
-    inflation_value = data.get('inflation_value')
-    year = data.get('year')
-
-    if collection_name == 'global_inflation':
-        collection = global_inflation
-    elif collection_name == 'food':
-        collection = food
-    elif collection_name == 'global_dataset':
-        collection = global_dataset
-    else:
-        return {"error": "Invalid collection name"}, 400
-
-    result = utils.insert_into_collection(collection, country_name, inflation_value, year)
-
-    if result.acknowledged:
-        return {"message": "Document inserted successfully"}, 200
-    else:
-        return {"error": "Failed to insert document"}, 500
-
-
-@app.route('/delete', methods=['DELETE'])
-def delete_document():
-    data = request.get_json()
-
-    collection_name = data.get('collection_name')
-    country_name = data.get('country_name')
-
-    if collection_name == 'global_inflation':
-        collection = global_inflation
-    elif collection_name == 'food':
-        collection = food
-    elif collection_name == 'global_dataset':
-        collection = global_dataset
-    else:
-        return {"error": "Invalid collection name"}, 400
-
-    result = utils.delete_from_collection(collection, country_name)
-
-    if result > 0:
-        return {"message": "Document deleted successfully"}, 200
-    else:
-        return {"error": "Failed to delete document or document does not exist"}, 500
-
-
 @app.get('/js/<path>')
 def serve_js(path: str) -> Response:
     return send_from_directory('static/js', escape(path))
@@ -178,8 +163,8 @@ def serve_favicon() -> Response:
 
 
 @app.errorhandler(404)
-def page_not_found(e) -> Response:
-    return send_from_directory('static', '404.html')
+def page_not_found(e) -> (Response, int):
+    return send_from_directory('static', '404.html'), 404
 
 
 def get_ccode(country: str):
@@ -196,8 +181,6 @@ if __name__ == '__main__':
     food = db['food']
     global_dataset = db['global_dataset']
     global_inflation = db['global_inflation']
-    us_cpi = db['consumer_price_index']
 
     countries = global_inflation.distinct('country_name')
     app.run(host='0.0.0.0', port=5000, debug=True)
-

@@ -1,50 +1,81 @@
-{% with title="Home" %}
-{% include "head.html" %}
-{% endwith %}
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    {% include "head.html" %}
+    <title>Home</title>
+</head>
 <body>
 {% include "navbar.html" %}
 <div class="container">
     <div class="row">
-        <div class="col-sm-6">
-            <div class="card">
-                <div class="card-body">
+        <div class="col-sm-4 mt-3">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Operazioni CRUD</h5>
+                    <p class="card-text mb-auto">Esegui le quattro operazioni basilari.</p>
+                    <a class="btn btn-primary mt-2" href="/crud"></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-4 mt-3">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
                     <h5 class="card-title">Inflazione massima</h5>
-                    <p class="card-text">Trova la nazione con inflazione massima per un determinato anno.</p>
-                    <a href="/max-inflation" class="btn btn-primary">Vai a Inflazione massima</a>
+                    <p class="card-text mb-auto">Trova la nazione con inflazione massima per un determinato anno.</p>
+                    <a class="btn btn-primary mt-2" href="/max-inflation"></a>
                 </div>
             </div>
         </div>
 
-        <div class="col-sm-6">
-            <div class="card">
-                <div class="card-body">
+        <div class="col-sm-4 mt-3">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
                     <h5 class="card-title">Inflazione per paese</h5>
-                    <p class="card-text">Visualizza l'inflazione annuale di un determinato paese.</p>
-                    <a href="/inflation-by-country" class="btn btn-primary">Vai a Inflazione per paese</a>
+                    <p class="card-text mb-auto">Visualizza l'inflazione annuale di un determinato paese.</p>
+                    <a class="btn btn-primary mt-2" href="/inflation-by-country"></a>
                 </div>
             </div>
         </div>
 
-        <div class="col-sm-6">
-            <div class="card">
-                <div class="card-body">
+        <div class="col-sm-4 mt-3">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
                     <h5 class="card-title">Inflazione Europea</h5>
-                    <p class="card-text">Visualizza l'inflazione annuale nei paesi dell'Unione Europea.</p>
-                    <a href="/eu" class="btn btn-primary">Vai a Inflazione Europea</a>
+                    <p class="card-text mb-auto">Visualizza l'inflazione annuale nei paesi dell'Unione Europea.</p>
+                    <a class="btn btn-primary mt-2" href="/eu"></a>
                 </div>
             </div>
         </div>
 
-        <div class="col-sm-6">
-            <div class="card">
-                <div class="card-body">
+        <div class="col-sm-4 mt-3">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
                     <h5 class="card-title">Inflazione media</h5>
-                    <p class="card-text">Visualizza l'inflazione media di un determinato paese.</p>
-                    <a href="/mean" class="btn btn-primary">Vai a Inflazione media</a>
+                    <p class="card-text mb-auto">Visualizza l'inflazione media di un determinato paese.</p>
+                    <a class="btn btn-primary mt-2" href="/mean"></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-4 mt-3">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Inflazione alimentare</h5>
+                    <p class="card-text mb-auto">TODO.</p>
+                    <a class="btn btn-primary mt-2" href="/alimentare"></a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", (event) => {
+        document.querySelectorAll('.card').forEach((card) => {
+            const title = card.querySelector('.card-title').textContent;
+            card.querySelector('a').textContent = `Vai a ${title}`;
+        });
+    });
+</script>
 </body>
 </html>

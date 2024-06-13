@@ -10,6 +10,6 @@
     display: flex;
     align-items: center;
 }
-.card {
-    margin-top: 1rem;
+.card-body p {
+    line-height: normal;
 }

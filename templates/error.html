@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    {% include "head.html" %}
+    <title>Errore</title>
+    <link href="/css/error.css" rel="stylesheet">
+</head>
+<body>
+{% include "navbar.html" %}
+<div class="error-container">
+    <h2>Errore {{ error }}</h2>
+    <p>{{ message }}</p>
+    <p><a href="#" onclick="window.history.back(); return false;">Torna indietro</a></p>
+</div>
+</body>
+</html>

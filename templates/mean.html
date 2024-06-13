@@ -1,35 +1,40 @@
-{% with title="Paese con inflazione massima" %}
-{% include "head.html" %}
-{% endwith %}
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    {% include "head.html" %}
+    <title>Inflazione media per Paese</title>
+</head>
 <body>
 {% include "navbar.html" %}
 <div class="container">
     <h3 class="mt-4">Inflazione media per Paese</h3>
-    <form method="POST" action="/mean" id="countryForm">
-    <div class="form-group my-3">
-        <label for="countrySelect">Seleziona il Paese</label>
-        <input class="form-control" id="countrySelect" name="country" list="countries" required>
-        <datalist id="countries">
-            {% for country in countries %}
+    <form action="/mean" id="countryForm" method="POST">
+        <div class="form-group my-3">
+            <label for="countrySelect">Seleziona il Paese</label>
+            <input class="form-control" id="countrySelect" list="countries" name="country" required>
+            <datalist id="countries">
+                {% for country in countries %}
                 <option value="{{ country }}">
-            {% endfor %}
-        </datalist>
-    </div>
-    <button type="submit" class="btn btn-primary">Invia</button>
-    </form>
-    <div id="error-toast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
-      <div class="d-flex">
-        <div class="toast-body">
-          Inserisci un paese valido prima di continuare.
+                    {% endfor %}
+            </datalist>
         </div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-      </div>
+        <button class="btn btn-primary" type="submit">Invia</button>
+    </form>
+    <div aria-atomic="true" aria-live="assertive" class="toast align-items-center text-bg-danger border-0" id="error-toast"
+         role="alert">
+        <div class="d-flex">
+            <div class="toast-body">
+                Inserisci un paese valido prima di continuare.
+            </div>
+            <button aria-label="Close" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    type="button"></button>
+        </div>
     </div>
     <script defer>
-        document.getElementById('countryForm').addEventListener('submit', function(event) {
+        document.getElementById('countryForm').addEventListener('submit', function (event) {
             var input = document.getElementById('countrySelect');
             var list = document.getElementById('countries');
-            var options = Array.from(list.options).map(function(option) {
+            var options = Array.from(list.options).map(function (option) {
                 return option.value;
             });
             if (!options.includes(input.value)) {
