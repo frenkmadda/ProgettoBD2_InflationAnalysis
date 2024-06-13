@@ -1,3 +1,6 @@
+from matplotlib import pyplot as plt
+
+
 def get_max_infl_year(collection, anno):
     """
     Estrae il paese che ha l'inflazione maggiore dato un anno.
@@ -163,25 +166,159 @@ def insert_into_collection(collection, country_name, inflation_value, year):
     return result
 
 
-def delete_from_collection(collection, country_name):
+def delete_document(collection, document):
     """
-    Elimina i documenti nella collection relativi al paese passato.
-    :param collection: La collection mongoDB
-    :param country_name: Nome del paese
-    :return: ritorna il numero di documenti eliminati
+    Cancella un documento da una collection
+    :param collection: La collection MongoDB
+    :param document: Il document da eliminare
+    :return: Il risultato dell'operazione
     """
 
-    if collection.name == "global_inflation":
-        param = "country_name"
-    elif collection.name == "global_dataset":
-        param = "Country"
-    elif collection.name == "food":
-        param = "country"
-    else:
-        raise ValueError("La collection non è valida")
+    result = collection.delete_one(document)
+    return result
 
-    result = collection.delete_many({param: country_name})
-    return result.deleted_count
+
+def integration_food(food, global_dataset):
+    """
+    Funzione per integrare i dati di food con global dataset.
+    Vengono formattati i dati di food, precedemente aventi un documento per ogni mese in
+    documenti divisi per anno e paese. Formattati 'Country', 'Year', 'infl'
+    Vengono poi identificati i paesi mancanti in global dataset che saranno integrati da food.
+    La differenza nella formattazione dei documenti può creare fastidio nei plot, il problema è
+    stato gestito in seguito.
+
+    :param food: la collection food di MongoDB
+    :param global_dataset: la collection di global dataset di MongoDB
+    :return: ritorna il cursore alla lista di documenti integrati
+    """
+    pipeline = [
+        {
+            "$addFields": {
+                "year": {"$year": "$date"},  # Estrai l'anno dalla data
+            }
+        },
+        {
+            "$group": {
+                "_id": {"country": "$country", "year": "$year"},  # Raggruppa per country e year
+                "inflationSum": {"$sum": "$Inflation"},  # Somma i valori di inflation
+            }
+        },
+        {
+            "$project": {
+                "_id": 0,
+                "country": "$_id.country",
+                "year": "$_id.year",
+                "Inflation": "$inflationSum",
+            }
+        },
+    ]
+    grouped_data = list(food.aggregate(pipeline))
+    country_codes = global_dataset.distinct("Country Code")
+    food_country_list = food.distinct("country")
+
+    result = list(get_eu_food_infl_countries(global_dataset, country_codes))
+    grouped_data_dict = {(doc['country'], doc['year']): doc.get('Inflation', 0) for doc in grouped_data if
+                         'country' in doc and 'year' in doc}
+    existing_countries = [doc['Country'] for doc in result]
+
+    for doc in result:
+        doc.pop('_id')
+        doc.pop('Indicator Type')
+        doc.pop('Note')
+
+    for country in food_country_list:
+        if country not in existing_countries:
+            for year in range(1980, 2025):
+                infl = grouped_data_dict.get((country, year))
+                if infl is not None:
+                    result.append({
+                        'country': country,
+                        'year': year,
+                        'infl': infl
+                    })
+
+    return result
+
+
+def format_data(grouped_data, documents_with_infl):
+    """
+    Formatta i dati per l'operazione di plotting rimuovendo i campo non necessari e formattando
+    i documenti in modo che contengano l'anno e il valore di inflazione in ogni documento.
+    I documenti di global dataset erano formati da un campo 'Country' e un campo per
+    ogni anno con associato il valore di inflazione.
+    Nei dati di food il campo 'country' viene rinominato in 'Country'
+    per uniformità con gli altri documenti.
+
+    :param grouped_data: i dati integrati di food e global dataset
+    :param documents_with_infl: i documenti di food per gestire la formattazione
+    :return: Una nuova lista di documenti formattata come 'Country', 'Year', 'infl'
+    """
+
+    grouped_data_year = []
+
+    # Itera attraverso gli anni nel documento originale
+    for doc in grouped_data:
+        for year in range(1996, 2023):
+            if str(year) in doc:
+                infl_value = doc[str(year)]
+            else:
+                infl_value = None
+            new_doc = {
+                "Year": year,
+                "infl": infl_value,
+                "Country Code": doc["Country Code"],
+                "Country": doc["Country"],
+                "Series Name": doc["Series Name"],
+            }
+            grouped_data_year.append(new_doc)
+
+    for doc in documents_with_infl:
+        doc['Country'] = doc.pop('country')
+
+    for doc in documents_with_infl:
+        grouped_data_year.append(doc)
+
+    return grouped_data_year
+
+
+def get_food_inflation_by_country(grouped_data_year, country):
+    """
+    Estrae l'inflazione alimentare di un paese per anno data una lista di documenti previamente
+    formattati per l'operazione
+    :param grouped_data_year: La lista di documenti formattati
+    :param country: Il paese di cui si vuole estrarre l'inflazione
+    :return: Gli anni e i valori di inflazione
+    """
+    country_data = [doc for doc in grouped_data_year if doc['Country'] == country]
+
+    years = [doc['Year'] for doc in country_data]
+    inflation_values = [doc['infl'] for doc in country_data]
+
+    return years, inflation_values
+
+
+def plot_food_inflation_by_country(collection_food, collection_global_dataset, country):
+    """
+    Pipeline di funzioni utile alla web app per plottare l'inflazione alimentare di un paese
+    integrando i dati di food e global_dataset
+    :param collection_food: la colletion Food di Mongodb
+    :param collection_global_dataset: la collection GlobalDataset di Mongodb
+    :param country: Il paese di cui si vuole plottare l'inflazione
+    :return: gli anni e i dati dell'inflazione
+    """
+
+    grouped_data = integration_food(collection_food, collection_global_dataset)
+
+    documents_with_infl = [doc for doc in grouped_data if 'infl' in doc]
+    grouped_data = [doc for doc in grouped_data if 'infl' not in doc]
+
+    grouped_data_year = format_data(grouped_data, documents_with_infl)
+
+    years, inflation_values = get_food_inflation_by_country(grouped_data_year, country)
+
+    return years, inflation_values
+
+
 
 
 
