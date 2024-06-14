@@ -6,6 +6,7 @@ import plotly.graph_objs as go
 import pycountry
 import pymongo
 from flask import Flask, render_template, send_from_directory, Response, request
+from pymongo.collection import Collection
 
 import utils
 
@@ -13,31 +14,22 @@ app = Flask('GUI Progetto')
 app.jinja_env.add_extension('jinja2.ext.loopcontrols')  # Aggiunge funzioni extra ai cicli, come il break
 
 
-@app.route('/')
+@app.get('/')
 def serve_index() -> str:
     return render_template('index.html')
 
 
-@app.get('/crud')
-def serve_crud() -> str:
-    result = food.find({})
-    data = dict((record['_id'], record) for record in result)
-    for key in data.keys():
-        del data[key]['_id']
-    return render_template('crud.html', data=data, collection='food')
+@app.get('/crud/read')
+def serve_default_crud_view() -> (str, int):
+    return serve_crud('food')
 
 
-@app.post('/crud')
-def crud_change_collection() -> (str, int):
-    collection_name = request.form['collection']
-    if collection_name == 'global_inflation':
-        collection = global_inflation
-    elif collection_name == 'food':
-        collection = food
-    elif collection_name == 'global_dataset':
-        collection = global_dataset
-    else:
-        return render_template('error.html', message='Invalid collection name', error='400 | Bad Request'), 400
+@app.get('/crud/read/<collection_name>')
+def serve_crud(collection_name: str) -> (str, int):
+    collection = get_collection_by_name(escape(collection_name))
+    if collection is None:
+        return render_template('error.html', message='Errore nella lettura della Collection',
+                               error='400 | Bad Request'), 400
 
     result = collection.find({})
     data = dict((record['_id'], record) for record in result)
@@ -46,19 +38,90 @@ def crud_change_collection() -> (str, int):
     return render_template('crud.html', data=data, collection=collection_name), 200
 
 
-@app.route('/crud/create')
-def serve_create() -> str:
-    return render_template('create.html')
+@app.get('/crud/create')
+def serve_create() -> (str, int):
+    collection_name = request.args.get('collection', default='')
+    collection = get_collection_by_name(collection_name)
+    if collection is None:
+        return render_template('error.html', message='Errore nella lettura della Collection',
+                               error='400 | Bad Request'), 400
+
+    return render_template('create.html', collection_name=collection_name), 200
 
 
-@app.route('/crud/update')
-def serve_update() -> str:
-    return render_template('update.html')
+@app.post('/crud/create')
+def create_document() -> (str, int):
+    collection_name = request.args.get('collection', default='')
+    country = request.args.get('country_name', default='')
+    inflation = request.args.get('inflation_value', default='')
+    year = request.args.get('year', default='')
+    collection = get_collection_by_name(collection_name)
+
+    if collection is None or country == '' or inflation == '' or year == '':
+        return render_template('error.html', message='Errore nella lettura dei dati',
+                               error='400 | Bad Request'), 400
+
+    if country == 'Sbiriguda':
+        return send_from_directory('static', 'easter-egg.html')  # TODO
+
+    utils.insert_into_collection(get_collection_by_name(collection_name), country, float(inflation), int(year))
+    return serve_crud(collection_name)
 
 
-@app.route('/crud/delete')
-def serve_delete() -> str:
-    return render_template('delete.html')
+@app.get('/crud/update')
+def serve_update() -> (str, int):
+    document_id = request.args.get('id', default='')
+    collection_name = request.args.get('collection', default='')
+    collection = get_collection_by_name(collection_name)
+    if collection is None:
+        return render_template('error.html', message='Errore nella lettura della Collection',
+                               error='400 | Bad Request'), 400
+
+    doc = utils.find_by_id(get_collection_by_name(collection_name), document_id)
+    if doc is None:
+            return render_template('error.html', message='Errore nella lettura del documento',
+                                   error='400 | Bad Request'), 400
+
+    return render_template('update.html', document=doc, collection=collection_name), 200
+
+
+@app.post('/crud/update')
+def update_document() -> (str, int):
+    data = dict(request.get_json())
+    print(data)
+    if data is None:
+        return render_template('error.html', message='Errore nella lettura dei dati',
+                               error='400 | Bad Request'), 400
+
+    collection_name = data.get('collection')
+    document_id = data.get('_id')
+    del data['_id']
+    del data['collection']
+
+    if collection_name is None or document_id is None or data == {}:
+        return render_template('error.html', message='Dati mancanti',
+                               error='400 | Bad Request'), 400
+
+    collection = get_collection_by_name(collection_name)
+    if collection is None:
+        return render_template('error.html', message='Errore nella lettura della Collection',
+                               error='400 | Bad Request'), 400
+
+    utils.update_document(collection, document_id, data)
+    return serve_crud(collection_name)
+
+
+@app.get('/crud/delete')
+def delete_document() -> (str, int):
+    document_id = request.args.get('id', default='')
+    collection_name = request.args.get('collection', default='')
+    collection = get_collection_by_name(collection_name)
+    if collection is None:
+        return render_template('error.html', message='Errore nella lettura della Collection',
+                               error='400 | Bad Request'), 400
+
+    utils.delete_document(collection, document_id)
+    return serve_crud(collection_name)
 
 
 @app.route('/inflation-by-country', methods=['GET', 'POST'])
@@ -90,8 +153,6 @@ def serve_max_inflation() -> str:
         year = request.form['year']
         result = utils.get_max_infl_year(global_inflation, year)
         documents = list(result)
-        country = None
-        output = {}
 
         country_max_infl = global_inflation.find_one({"_id": documents[0]['_id']})
         country = country_max_infl['country_name']
@@ -116,7 +177,7 @@ def serve_mean() -> str:
         return render_template('mean.html', countries=countries, inflation_value=None)
 
 
-@app.route('/eu')
+@app.get('/eu')
 def serve_eu() -> str:
     query = {"Country Code": {
         "$in": ["AUT", "BEL", "BGR", "HRV", "CYP", "CZE", "DNK", "EST", "FIN", "FRA", "DEU", "GRC", "HUN", "IRL", "ITA",
@@ -174,7 +235,31 @@ def get_ccode(country: str):
         return None
 
 
+def get_collection_by_name(collection_name: str) -> Collection | None:
+    if collection_name == 'global_inflation':
+        return global_inflation
+    elif collection_name == 'food':
+        return food
+    elif collection_name == 'global_dataset':
+        return global_dataset
+    else:
+        return None
+
+
+def get_crud_data(collection_name: str) -> dict | None:
+    collection = get_collection_by_name(collection_name)
+    if collection is None:
+        return None
+
+    result = collection.find({})
+    data = dict((record['_id'], record) for record in result)
+    for key in data.keys():
+        del data[key]['_id']
+    return data
+
+
 if __name__ == '__main__':
+    print('Connessione al database in corso…')
     client = pymongo.MongoClient('mongodb://localhost:27017/')
     db = client['ProgettoBD2']
 

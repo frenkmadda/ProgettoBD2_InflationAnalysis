@@ -7,7 +7,7 @@
 <body>
 {% include "navbar.html" %}
 <div class="container">
-    <form action="/crud" class="mb-3" method="post">
+    <form id="form" class="mb-3" method="get">
         <div class="input-group">
             <select class="form-select" id="collection" name="collection">
                 <option value="food">Food</option>
@@ -25,22 +25,55 @@
         <div class="col-sm-3 mt-3">
             <div class="card h-100">
                 <div class="card-body">
-                    <h5 class="card-title">{{ key }}</h5>
+                    <h6 class="card-title">{{ key }}</h6>
                     {% for k, v in value.items() %}
-                    <p><strong>{{ k }}:</strong> {{ v }}</p>
+                    <p class="card-text mb-auto"><strong>{{ k }}:</strong> {{ v }}</p>
                     {% endfor %}
                     <a class="btn btn-primary mt-2" href="/crud/update?collection={{ collection }}&id={{ key }}">Aggiorna</a>
-                    <a class="btn btn-danger mt-2"
-                       href="/crud/delete?collection={{ collection }}&id={{ key }}">Rimuovi</a>
+                    <a class="btn btn-danger mt-2 btn-del" href="/crud/delete?collection={{ collection }}&id={{ key }}">Rimuovi</a>
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
+
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmModalLabel">Conferma rimozione</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Sei sicuro di voler rimuovere questo documento?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+        <a href="#" class="btn btn-danger" id="confirmDelete">Rimuovi</a>
+      </div>
+    </div>
+  </div>
+</div>
 </div>
 <script>
     document.addEventListener("DOMContentLoaded", (event) => {
         document.getElementById('collection').value = '{{ collection }}';
+
+        document.querySelectorAll('.btn-del').forEach((btn) => {
+            btn.addEventListener('click', function(event) {
+                event.preventDefault();
+                const href = btn.getAttribute('href');
+                document.getElementById('confirmDelete').setAttribute('href', href);
+                const myModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+                myModal.show();
+            });
+        });
+
+        document.getElementById('form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            let collection = document.querySelector('#collection').value;
+            window.location.href = '/crud/read/' + collection;
+        });
     });
 </script>
 </body>

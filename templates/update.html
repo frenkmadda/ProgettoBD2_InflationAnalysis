@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    {% include "head.html" %}
+    <title>Modifica documento</title>
+</head>
+<body>
+{% include "navbar.html" %}
+
+<div class="container">
+    <h1 class="mb-4">Modifica documento</h1>
+    <form method="post">
+        {% for key, value in document.items() %}
+            <div class="row mb-3">
+                <label for="{{ key }}" class="col-sm-2 col-form-label"><strong>{{ key }}</strong></label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="{{ key }}" name="{{ key }}" value="{{ value }}">
+                </div>
+            </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Aggiorna</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", (event) => {
+    const myForm = document.querySelector('form');
+    myForm.querySelector('#_id').setAttribute('readonly', '');
+
+    myForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        let formData = new FormData(myForm);
+        let object = {};
+        formData.forEach((value, key) => object[key] = value);
+        object['collection'] = '{{ collection }}';
+        let json = JSON.stringify(object);
+
+        fetch('/crud/update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: json
+        }).then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Errore durante l\'invio del form: ' + response.status);
+            }
+        }).then(data => {
+            console.log('Dati inviati con successo:', data);
+            window.location.href = '/crud/read/{{ collection }}';
+        }).catch((error) => {
+            console.error('Errore:', error);
+            window.location.href = '/crud/read/{{ collection }}';
+        });
+    });
+});
+</script>
+</body>
+</html>

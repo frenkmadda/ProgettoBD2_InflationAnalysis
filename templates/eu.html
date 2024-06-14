@@ -12,11 +12,7 @@
 
     <script defer>
         document.addEventListener("DOMContentLoaded", (event) => {
-            var graphs = {
-            {
-                graphJSON | safe
-            }
-        }
+            var graphs = {{ graphJSON | safe }};
 
             Plotly.newPlot('graph', graphs, {});
         });

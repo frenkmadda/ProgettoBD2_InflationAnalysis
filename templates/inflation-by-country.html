@@ -51,24 +51,16 @@
     <div id="graph"></div>
     <script defer>
         document.addEventListener("DOMContentLoaded", (event) => {
-            var graphs = {
-            {
-                graphJSON | safe
-            }
-        }
+            var graphs = {{ graphJSON | safe }};
 
             if (!graphs)
                 return;
 
             Plotly.newPlot('graph', graphs, {});
             document.getElementById('mes').innerText = "Inflazione annua di: {{ paese }}";
-            {%
-                if ccode %
-            }
+            {% if ccode %}
             document.getElementById('flag').src = "https://flagsapi.com/{{ccode}}/shiny/64.png";
-            {%
-                endif %
-            }
+            {% endif %}
         });
     </script>
 </div>
