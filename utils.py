@@ -38,13 +38,13 @@ def get_avg_infl_years(collection, country):
     ])
 
 
-def get_avg_infl_eur(collection, europeanCountriesList):
+def get_avg_infl_eur(collection, european_countries):
     """
     Estrae l'inflazione dei paesi dell'UE eliminando le categorie e accorpando
     le 5 categorie in unico valore calcolato con una media tra i 5.
 
     :param collection:            La Collection di MongoDB
-    :param europeanCountriesList:
+    :param european_countries:
     :return:
     """
     # Creazione dell'array con gli anni di interesse
@@ -53,7 +53,7 @@ def get_avg_infl_eur(collection, europeanCountriesList):
     # Creazione del pipeline di aggregazione
     pipeline = [
         # Filtro per i paesi europei
-        {"$match": {"Country": {"$in": europeanCountriesList}}},
+        {"$match": {"Country": {"$in": european_countries}}},
         # Raggruppamento per paese e calcolo della media per ogni anno
         {"$group": {
             "_id": "$Country",
@@ -71,7 +71,7 @@ def get_food_inflation_eur_per_year(collection, europeanCountriesList):
     """
     Estrae e fa una media del tasso di inflazione nel campo alimentare negli anni.
 
-    :param db:
+    :param collection:
     :param europeanCountriesList:
     :return:
     """
@@ -114,12 +114,12 @@ def get_eu_food_infl_countries(collection, country_list):
 
 
 def get_inflation_by_country(dataset, country_name):
-    '''
+    """
     Estrae gli anni e i valori di inflazione per il paese specificato.
     :param dataset: Dataset global_inflation
     :param country_name: Nome del paese
     :return: anni e valori di inflazione
-    '''
+    """
     # Estrazione dei dati di inflazione per il paese specificato
     country_data = dataset.find_one({"country_name": country_name})
 
@@ -148,7 +148,7 @@ def insert_into_collection(collection, country_name, inflation_value, year):
         raise ValueError("L'anno deve essere compreso tra il 1980 e il 2024!")
 
     if collection.name == "global_inflation":
-        param= "country_name"
+        param = "country_name"
     elif collection.name == "global_dataset":
         param = "Country"
     elif collection.name == "food":
@@ -166,40 +166,40 @@ def insert_into_collection(collection, country_name, inflation_value, year):
     return result.inserted_id
 
 
-def delete_document(collection, id):
+def delete_document(collection, doc_id):
     """
     Cancella un documento da una collection
     :param collection: La collection MongoDB
-    :param id: L'id del documento da cancellare
+    :param doc_id: L'id del documento da cancellare
     :return: Il risultato dell'operazione
     """
-    query = {"_id": ObjectId(id)}
+    query = {"_id": ObjectId(doc_id)}
     result = collection.delete_one(query)
     return result
 
 
-def find_by_id(collection, id):
+def find_by_id(collection, doc_id):
     """
     Trova un documento in una collection dato il suo id
     :param collection: La collection MongoDB
-    :param id: L'id del documento da cercare
+    :param doc_id: L'id del documento da cercare
     :return: il risultato dell'operazione come cursore
     """
-    query = {"_id": ObjectId(id)}
+    query = {"_id": ObjectId(doc_id)}
     result = collection.find_one(query)
 
     return result
 
 
-def update_document(collection, id, document):
+def update_document(collection, doc_id, document):
     """
     Aggiorna un documento in una collection
     :param collection: La collection MongoDB
-    :param id: L'id del documento da aggiornare
+    :param doc_id: L'id del documento da aggiornare
     :param document: Il documento con i nuovi valori
     :return: Il risultato dell'operazione
     """
-    query = {"_id": ObjectId(id)}
+    query = {"_id": ObjectId(doc_id)}
     new_values = {"$set": document}
     result = collection.update_one(query, new_values)
     return result
@@ -344,10 +344,3 @@ def plot_food_inflation_by_country(collection_food, collection_global_dataset, c
     years, inflation_values = get_food_inflation_by_country(grouped_data_year, country)
 
     return years, inflation_values
-
-
-
-
-
-
-
