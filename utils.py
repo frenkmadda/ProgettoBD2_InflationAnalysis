@@ -47,10 +47,8 @@ def get_avg_infl_eur(collection, european_countries):
     :param european_countries:
     :return:
     """
-    # Creazione dell'array con gli anni di interesse
     years = [str(year) for year in range(1970, 2025)]
 
-    # Creazione del pipeline di aggregazione
     pipeline = [
         # Filtro per i paesi europei
         {"$match": {"Country": {"$in": european_countries}}},
@@ -61,7 +59,6 @@ def get_avg_infl_eur(collection, european_countries):
         }}
     ]
 
-    # Esecuzione dell'aggregazione
     result = collection.aggregate(pipeline)
 
     return result
@@ -75,10 +72,8 @@ def get_food_inflation_eur_per_year(collection, europeanCountriesList):
     :param europeanCountriesList:
     :return:
     """
-    # Creazione dell'array con gli anni di interesse
     years = [str(year) for year in range(1970, 2023)]
 
-    # Creazione del pipeline di aggregazione
     pipeline = [
         # Filtro per i documenti con "Series Name" = "Food Consumer Price Inflation"
         {"$match": {"Series Name": "Food Consumer Price Inflation"}},
@@ -89,7 +84,6 @@ def get_food_inflation_eur_per_year(collection, europeanCountriesList):
         }}
     ]
 
-    # Esecuzione dell'aggregazione
     result = collection.aggregate(pipeline)
 
     return result
@@ -120,7 +114,6 @@ def get_inflation_by_country(dataset, country_name):
     :param country_name: Nome del paese
     :return: anni e valori di inflazione
     """
-    # Estrazione dei dati di inflazione per il paese specificato
     country_data = dataset.find_one({"country_name": country_name})
 
     # Rimozione dei campi non necessari
