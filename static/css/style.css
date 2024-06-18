@@ -5,7 +5,7 @@
     width: 3rem;
     margin-left: 0.5rem;
 }
-#msg-div {
+.msg-div {
     margin-top: 1rem;
     display: flex;
     align-items: center;

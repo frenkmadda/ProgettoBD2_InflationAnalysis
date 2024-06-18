@@ -16,9 +16,9 @@
         <button class="btn btn-primary" type="submit">Submit</button>
     </form>
     {% if country %}
-    <div id="msg-div">
+    <div class="msg-div">
         <h4>Paese con inflazione massima nel {{year}}: {{country}} ({{ inflation_value }}%)</h4>
-        {% if ccode %}<img id="flag" src="https://flagsapi.com/{{ccode}}/shiny/64.png">{%endif%}
+        {% if ccode %}<img id="flag" src="https://flagcdn.com/48x36/{{ ccode }}.png">{%endif%}
     </div>
     {%endif%}
 </div>

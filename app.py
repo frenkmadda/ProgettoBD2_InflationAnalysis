@@ -11,7 +11,7 @@ from pymongo.collection import Collection
 import utils
 
 app = Flask('GUI Progetto')
-app.jinja_env.add_extension('jinja2.ext.loopcontrols')  # Aggiunge funzioni extra ai cicli, come il break
+app.jinja_env.add_extension('jinja2.ext.loopcontrols')  # Aggiunge funzioni extra ai cicli di Flask, come il break
 
 
 @app.get('/')
@@ -28,8 +28,7 @@ def serve_default_crud_view() -> (str, int):
 def serve_crud(collection_name: str) -> (str, int):
     collection = get_collection_by_name(escape(collection_name))
     if collection is None:
-        return render_template('error.html', message='Errore nella lettura della Collection',
-                               error='400 | Bad Request'), 400
+        return bad_request('Errore nella lettura della Collection')
 
     result = collection.find({})
     data = dict((record['_id'], record) for record in result)
@@ -43,8 +42,7 @@ def serve_create() -> (str, int):
     collection_name = request.args.get('collection', default='')
     collection = get_collection_by_name(collection_name)
     if collection is None:
-        return render_template('error.html', message='Errore nella lettura della Collection',
-                               error='400 | Bad Request'), 400
+        return bad_request('Errore nella lettura della Collection')
 
     return render_template('create.html', collection_name=collection_name), 200
 
@@ -58,11 +56,10 @@ def create_document() -> (str, int):
     collection = get_collection_by_name(collection_name)
 
     if collection is None or country == '' or inflation == '' or year == '':
-        return render_template('error.html', message='Errore nella lettura dei dati',
-                               error='400 | Bad Request'), 400
+        return bad_request('Errore nella lettura dei dati')
 
     if country == 'Sbiriguda':
-        return send_from_directory('static', 'easter-egg.html')  # TODO
+        return send_from_directory('static', 'easter-egg.html')
 
     utils.insert_into_collection(get_collection_by_name(collection_name), country, float(inflation), int(year))
     return serve_crud(collection_name)
@@ -74,13 +71,11 @@ def serve_update() -> (str, int):
     collection_name = request.args.get('collection', default='')
     collection = get_collection_by_name(collection_name)
     if collection is None:
-        return render_template('error.html', message='Errore nella lettura della Collection',
-                               error='400 | Bad Request'), 400
+        return bad_request('Errore nella lettura della Collection')
 
     doc = utils.find_by_id(get_collection_by_name(collection_name), document_id)
     if doc is None:
-            return render_template('error.html', message='Errore nella lettura del documento',
-                                   error='400 | Bad Request'), 400
+        return bad_request('Errore nella lettura del documento')
 
     return render_template('update.html', document=doc, collection=collection_name), 200
 
@@ -90,8 +85,7 @@ def update_document() -> (str, int):
     data = dict(request.get_json())
     print(data)
     if data is None:
-        return render_template('error.html', message='Errore nella lettura dei dati',
-                               error='400 | Bad Request'), 400
+        return bad_request('Errore nella lettura dei dati')
 
     collection_name = data.get('collection')
     document_id = data.get('_id')
@@ -99,13 +93,11 @@ def update_document() -> (str, int):
     del data['collection']
 
     if collection_name is None or document_id is None or data == {}:
-        return render_template('error.html', message='Dati mancanti',
-                               error='400 | Bad Request'), 400
+        return bad_request('Errore nella lettura dei dati')
 
     collection = get_collection_by_name(collection_name)
     if collection is None:
-        return render_template('error.html', message='Errore nella lettura della Collection',
-                               error='400 | Bad Request'), 400
+        return bad_request('Errore nella lettura della Collection')
 
     utils.update_document(collection, document_id, data)
     return serve_crud(collection_name)
@@ -117,8 +109,7 @@ def delete_document() -> (str, int):
     collection_name = request.args.get('collection', default='')
     collection = get_collection_by_name(collection_name)
     if collection is None:
-        return render_template('error.html', message='Errore nella lettura della Collection',
-                               error='400 | Bad Request'), 400
+        return bad_request('Errore nella lettura della Collection')
 
     utils.delete_document(collection, document_id)
     return serve_crud(collection_name)
@@ -177,8 +168,8 @@ def serve_mean() -> str:
         return render_template('mean.html', countries=countries, inflation_value=None)
 
 
-@app.get('/eu')
-def serve_eu() -> str:
+@app.get('/eug7')
+def serve_eug7() -> str:
     query = {"Country Code": {
         "$in": ["AUT", "BEL", "BGR", "HRV", "CYP", "CZE", "DNK", "EST", "FIN", "FRA", "DEU", "GRC", "HUN", "IRL", "ITA",
                 "LVA", "LTU", "LUX", "MLT", "NLD", "POL", "PRT", "ROU", "SVK", "SVN", "ESP", "SWE"]}}
@@ -204,8 +195,29 @@ def serve_eu() -> str:
         )
     ]
 
-    graph_json = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
-    return render_template('eu.html', graphJSON=graph_json)
+    eu_graph_json = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
+
+    query = {"Country Code": {"$in": ["FRA", "DEU", "ITA", "USA", "CAN", "JPN", "GBR"]}}
+    g7 = global_dataset.distinct('Country', query)
+    result = utils.get_food_inflation_list_per_year(global_dataset, g7)
+    output = {}
+    for doc in result:
+        doc.pop('_id')
+        output.update(doc)
+
+    anni = list(output.keys())
+    inflazione = list(output.values())
+    data = [
+        go.Scatter(
+            x=anni,
+            y=inflazione,
+            mode='lines+markers',
+            name='Inflazione annuale'
+        )
+    ]
+    g7_graph_json = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
+
+    return render_template('eu.html', euGraphJSON=eu_graph_json, g7GraphJSON=g7_graph_json)
 
 
 @app.get('/js/<path>')
@@ -218,6 +230,11 @@ def serve_css(path: str) -> Response:
     return send_from_directory('static/css', escape(path))
 
 
+@app.get('/img/<path>')
+def serve_imgs(path: str) -> Response:
+    return send_from_directory('static/img', escape(path), mimetype='image/jpg')
+
+
 @app.get('/favicon.png')
 def serve_favicon() -> Response:
     return send_from_directory('static', 'logo.png', mimetype='image/png')
@@ -228,9 +245,13 @@ def page_not_found(e) -> (Response, int):
     return send_from_directory('static', '404.html'), 404
 
 
+def bad_request(message: str) -> (str, int):
+    return render_template('error.html', message=message), 400
+
+
 def get_ccode(country: str):
     try:
-        return pycountry.countries.search_fuzzy(country)[0].alpha_2
+        return pycountry.countries.search_fuzzy(country)[0].alpha_2.lower()
     except LookupError:
         return None
 
