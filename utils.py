@@ -89,7 +89,7 @@ def get_food_inflation_eur_per_year(collection, europeanCountriesList):
     return result
 
 
-def get_eu_food_infl_countries(collection, country_list):
+def get_food_infl_countries(collection, country_list):
     """
     Estrae il tasso di inflazione nel campo alimentare dei paesi Europei.
 
@@ -236,7 +236,7 @@ def integration_food(food, global_dataset):
     country_codes = global_dataset.distinct("Country Code")
     food_country_list = food.distinct("country")
 
-    result = list(get_eu_food_infl_countries(global_dataset, country_codes))
+    result = list(get_food_infl_countries(global_dataset, country_codes))
     grouped_data_dict = {(doc['country'], doc['year']): doc.get('Inflation', 0) for doc in grouped_data if
                          'country' in doc and 'year' in doc}
     existing_countries = [doc['Country'] for doc in result]
