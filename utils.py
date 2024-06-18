@@ -38,20 +38,20 @@ def get_avg_infl_years(collection, country):
     ])
 
 
-def get_avg_infl_list(collection, european_countries):
+def get_avg_infl_list(collection, country_list):
     """
     Estrae l'inflazione dei paesi dell'UE eliminando le categorie e accorpando
     le 5 categorie in unico valore calcolato con una media tra i 5.
 
-    :param collection:            La Collection di MongoDB
-    :param european_countries:
-    :return:
+    :param collection: La Collection di MongoDB
+    :param country_list: Lista di paesi interessata
+    :return: cursore con il risultato dell'operazione
     """
     years = [str(year) for year in range(1970, 2025)]
 
     pipeline = [
         # Filtro per i paesi europei
-        {"$match": {"Country": {"$in": european_countries}}},
+        {"$match": {"Country": {"$in": country_list}}},
         # Raggruppamento per paese e calcolo della media per ogni anno
         {"$group": {
             "_id": "$Country",
@@ -68,9 +68,9 @@ def get_food_inflation_list_per_year(collection, countries_list):
     """
     Estrae e fa una media del tasso di inflazione nel campo alimentare negli anni.
 
-    :param collection:
-    :param countries_list:
-    :return:
+    :param collection: la collection mongodb
+    :param countries_list: la lista di paesi interessata
+    :return: cursore contente il risultato dell'operazione
     """
     years = [str(year) for year in range(1970, 2023)]
 
