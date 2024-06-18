@@ -38,6 +38,25 @@ def get_avg_infl_years(collection, country):
     ])
 
 
+def get_min_max_inflation(collection, country):
+    """
+    Prende l'inflazione minima e massima per un determinato paese da una collection.
+
+    :param collection: La collection MongoDB da cui prelevare i dati.
+    :param country: Il paese per cui ottenere l'inflazione minima e massima.
+    :return: Una tupla con l'inflazione minima e massima.
+    """
+    document = collection.find_one({"country_name": country})
+    if document is None:
+        return None, None
+
+    inflation_values = [value for key, value in document.items() if key.isdigit()]
+    min_inflation = min(inflation_values) if inflation_values else None
+    max_inflation = max(inflation_values) if inflation_values else None
+
+    return min_inflation, max_inflation
+
+
 def get_avg_infl_list(collection, country_list):
     """
     Estrae l'inflazione dei paesi dell'UE eliminando le categorie e accorpando

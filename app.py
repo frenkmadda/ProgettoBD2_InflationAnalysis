@@ -150,8 +150,19 @@ def serve_max_inflation() -> str:
         inflation_value = country_max_infl[year]
         ccode = get_ccode(country)
 
-        return render_template('max-inflation.html', inflation_value=inflation_value, country=country, year=year,
-                               ccode=ccode)
+        years, inflation_values = utils.get_inflation_by_country(global_inflation, country)
+        # Creazione del grafico
+        data = [
+            go.Scatter(
+                x=years,
+                y=inflation_values,
+                mode='lines+markers',
+                name='Inflazione annuale'
+            )
+        ]
+        graph_json = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
+        return render_template('max-inflation.html', inflation_value=inflation_value, country=country,
+                               year=year, graphJson=graph_json, ccode=ccode)
     else:
         return render_template('max-inflation.html')
 
@@ -162,14 +173,37 @@ def serve_mean() -> str:
         country = request.form['country']
         inflation_value = utils.get_avg_infl_years(global_inflation, country).next()['avgInflation']
         ccode = get_ccode(country)
+
+        min_infl, max_infl = utils.get_min_max_inflation(global_inflation, country)
         return render_template('mean.html', countries=countries, inflation_value=round(inflation_value, 2),
-                               paese=country, ccode=ccode)
+                               paese=country, ccode=ccode, min_infl=min_infl, max_infl=max_infl)
     else:
         return render_template('mean.html', countries=countries, inflation_value=None)
 
 
-@app.get('/eug7')
-def serve_eug7() -> str:
+@app.route('/food-infl', methods=['GET', 'POST'])
+def serve_food_infl() -> str:
+    if request.method == 'POST':
+        country = request.form['country']
+        years, inflation_values = utils.plot_food_inflation_by_country(food, global_dataset, country)
+        data = [
+            go.Scatter(
+                x=years,
+                y=inflation_values,
+                mode='lines+markers',
+                name='Inflazione annuale'
+            )
+        ]
+        graph = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
+
+        ccode = get_ccode(country)
+        return render_template('food-infl.html', graph=graph, countries=countries, paese=country, ccode=ccode)
+    else:
+        return render_template('food-infl.html', countries=countries)
+
+
+@app.get('/eu-g7')
+def serve_eu_g7() -> str:
     query = {"Country Code": {
         "$in": ["AUT", "BEL", "BGR", "HRV", "CYP", "CZE", "DNK", "EST", "FIN", "FRA", "DEU", "GRC", "HUN", "IRL", "ITA",
                 "LVA", "LTU", "LUX", "MLT", "NLD", "POL", "PRT", "ROU", "SVK", "SVN", "ESP", "SWE"]}}
@@ -217,7 +251,7 @@ def serve_eug7() -> str:
     ]
     g7_graph_json = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
 
-    return render_template('eu.html', euGraphJSON=eu_graph_json, g7GraphJSON=g7_graph_json)
+    return render_template('eu-g7.html', euGraphJSON=eu_graph_json, g7GraphJSON=g7_graph_json)
 
 
 @app.get('/js/<path>')

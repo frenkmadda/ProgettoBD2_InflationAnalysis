@@ -31,23 +31,29 @@
         </div>
     </div>
     <script defer>
-        document.getElementById('countryForm').addEventListener('submit', function (event) {
-            var input = document.getElementById('countrySelect');
-            var list = document.getElementById('countries');
-            var options = Array.from(list.options).map(function (option) {
-                return option.value;
+        document.addEventListener("DOMContentLoaded", (event) => {
+            document.getElementById('countryForm').addEventListener('submit', function (event) {
+                let input = document.getElementById('countrySelect');
+                let list = document.getElementById('countries');
+                let options = Array.from(list.options).map(function (option) {
+                    return option.value;
+                });
+                if (!options.includes(input.value)) {
+                    bootstrap.Toast.getOrCreateInstance(document.getElementById('error-toast')).show();
+                    event.preventDefault();
+                }
             });
-            if (!options.includes(input.value)) {
-                bootstrap.Toast.getOrCreateInstance(document.getElementById('error-toast')).show();
-                event.preventDefault();
-            }
         });
+
     </script>
     {% if inflation_value %}
     <div class="msg-div">
         <h4>La media dell'inflazione dal 1980 al 2024 di {{ paese }} è {{ inflation_value }}%</h4>
-        {% if ccode %}<img id="flag" src="https://flagcdn.com/48x36/{{ ccode }}.png">{% endif %}
+        {% if ccode %}<img id="flag" src="https://flagcdn.com/256x192/{{ ccode }}.png">{% endif %}
     </div>
+    {% if max_infl and min_infl %}
+    <h5>L'inflazione minima è stata {{ min_infl }}%, quella massima {{ max_infl }}%</h5>
+    {% endif %}
     {%endif%}
 </div>
 </body>

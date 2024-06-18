@@ -2,13 +2,13 @@
 <html lang="it">
 <head>
     {% include "head.html" %}
-    <title>Inflazione annua per Paese</title>
+    <title>Inflazione alimentare annua per Paese</title>
 </head>
 <body>
 {% include "navbar.html" %}
 <div class="container">
-    <h3>Inflazione annua per Paese</h3>
-    <form action="/inflation-by-country" id="countryForm" method="POST">
+    <h3>Inflazione alimentare annua per Paese</h3>
+    <form action="/food-infl" id="countryForm" method="POST">
         <div class="form-group my-3">
             <label for="countrySelect">Seleziona il Paese</label>
             <input class="form-control" id="countrySelect" list="countries" name="country" required>
@@ -32,9 +32,6 @@
         </div>
     </div>
     </div>
-    <script defer>
-
-    </script>
 
     <div class="msg-div">
         <h4 id="mes"></h4>
@@ -55,12 +52,12 @@
                 }
             });
 
-            let graphs = {{ graphJSON | safe }};
+            let graphs = {{ graph | safe }};
             if (!graphs)
                 return;
 
             Plotly.newPlot('graph', graphs, {});
-            document.getElementById('mes').innerText = "Inflazione annua di: {{ paese }}";
+            document.getElementById('mes').innerText = "Inflazione alimentare annua di: {{ paese }}";
             {% if ccode %}
             document.getElementById('flag').src = "https://flagcdn.com/256x192/{{ ccode }}.png";
             {% endif %}
