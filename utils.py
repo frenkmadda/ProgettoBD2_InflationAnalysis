@@ -38,7 +38,7 @@ def get_avg_infl_years(collection, country):
     ])
 
 
-def get_avg_infl_eur(collection, european_countries):
+def get_avg_infl_list(collection, european_countries):
     """
     Estrae l'inflazione dei paesi dell'UE eliminando le categorie e accorpando
     le 5 categorie in unico valore calcolato con una media tra i 5.
@@ -64,20 +64,21 @@ def get_avg_infl_eur(collection, european_countries):
     return result
 
 
-def get_food_inflation_eur_per_year(collection, europeanCountriesList):
+def get_food_inflation_list_per_year(collection, countries_list):
     """
     Estrae e fa una media del tasso di inflazione nel campo alimentare negli anni.
 
     :param collection:
-    :param europeanCountriesList:
+    :param countries_list:
     :return:
     """
     years = [str(year) for year in range(1970, 2023)]
 
     pipeline = [
-        # Filtro per i documenti con "Series Name" = "Food Consumer Price Inflation"
-        {"$match": {"Series Name": "Food Consumer Price Inflation"}},
-        # Raggruppamento per anno e calcolo della media per ogni anno
+        {"$match": {
+            "Series Name": "Food Consumer Price Inflation",
+            "Country": {"$in": countries_list}
+        }},
         {"$group": {
             "_id": None,
             **{year: {"$avg": f"${year}"} for year in years}
@@ -214,7 +215,7 @@ def integration_food(food, global_dataset):
     pipeline = [
         {
             "$addFields": {
-                "year": {"$year": "$date"},  # Estrai l'anno dalla data
+                "year": {"$year": "$date"},  # Estrai l'anno dalla data e crea il campo Year
             }
         },
         {

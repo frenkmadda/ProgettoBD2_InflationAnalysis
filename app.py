@@ -183,7 +183,7 @@ def serve_eu() -> str:
         "$in": ["AUT", "BEL", "BGR", "HRV", "CYP", "CZE", "DNK", "EST", "FIN", "FRA", "DEU", "GRC", "HUN", "IRL", "ITA",
                 "LVA", "LTU", "LUX", "MLT", "NLD", "POL", "PRT", "ROU", "SVK", "SVN", "ESP", "SWE"]}}
     eu = global_dataset.distinct('Country', query)
-    result = utils.get_food_inflation_eur_per_year(global_dataset, eu)
+    result = utils.get_food_inflation_list_per_year(global_dataset, eu)
     output = {}
 
     # Riempimento del dizionario con i risultati
