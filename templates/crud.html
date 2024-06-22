@@ -14,9 +14,7 @@
                 <option value="global_dataset">Global Dataset</option>
                 <option value="global_inflation">Global Inflation</option>
             </select>
-            <input class="btn btn-primary" type="submit" value="Cambia collection">
-            <a class="btn btn-success ms-2" href="/crud/create?collection={{ collection }}" id="create-button">Crea
-                documento</a>
+            <input class="btn btn-success" type="submit" value="Crea Documento">
         </div>
     </form>
 
@@ -71,8 +69,11 @@
 
         document.getElementById('form').addEventListener('submit', function(event) {
             event.preventDefault();
-            let collection = document.querySelector('#collection').value;
-            window.location.href = '/crud/read/' + collection;
+            window.location.href = '/crud/create?collection={{ collection }}';
+        });
+
+        document.querySelector('#collection').addEventListener('change', function(event) {
+            window.location.href = '/crud/read/' + event.target.value;
         });
     });
 </script>

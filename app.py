@@ -323,4 +323,5 @@ if __name__ == '__main__':
     global_inflation = db['global_inflation']
 
     countries = global_inflation.distinct('country_name')
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    print("Connesso. Avvio dell'app in corso…")
+    app.run(host='0.0.0.0', port=5000)
