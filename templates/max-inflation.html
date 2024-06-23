@@ -5,6 +5,7 @@
     <title>Paese con massima inflazione</title>
 </head>
 <body>
+<div class="page-container">
 {% include "navbar.html" %}
 <div class="container">
     <h3 class="mt-4">Paese con massima inflazione</h3>
@@ -31,6 +32,8 @@
             Plotly.newPlot('graph', graphs, {});
         });
     </script>
+</div>
+{% include "footer.html" %}
 </div>
 </body>
 </html>

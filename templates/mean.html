@@ -5,6 +5,7 @@
     <title>Inflazione media per Paese</title>
 </head>
 <body>
+<div class="page-container">
 {% include "navbar.html" %}
 <div class="container">
     <h3 class="mt-4">Inflazione media per Paese</h3>
@@ -55,6 +56,8 @@
     <h5>L'inflazione minima è stata {{ min_infl }}%, quella massima {{ max_infl }}%</h5>
     {% endif %}
     {%endif%}
+</div>
+{% include "footer.html" %}
 </div>
 </body>
 </html>

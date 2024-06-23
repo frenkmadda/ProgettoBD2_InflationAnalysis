@@ -5,6 +5,7 @@
     <title>Inflazione annua per Paese</title>
 </head>
 <body>
+<div class="page-container">
 {% include "navbar.html" %}
 <div class="container">
     <h3>Inflazione annua per Paese</h3>
@@ -32,9 +33,6 @@
         </div>
     </div>
     </div>
-    <script defer>
-
-    </script>
 
     <div class="msg-div">
         <h4 id="mes"></h4>
@@ -59,6 +57,7 @@
             if (!graphs)
                 return;
 
+            console.log(graphs);
             Plotly.newPlot('graph', graphs, {});
             document.getElementById('mes').innerText = "Inflazione annua di: {{ paese }}";
             {% if ccode %}
@@ -66,6 +65,8 @@
             {% endif %}
         });
     </script>
+</div>
+{% include "footer.html" %}
 </div>
 </body>
 </html>

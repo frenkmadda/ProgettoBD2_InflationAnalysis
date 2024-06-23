@@ -26,3 +26,39 @@
     cursor: pointer;
     transform: scale(1.1);
 }
+
+.page-container {
+    position: relative;
+    min-height: 100vh;
+}
+.container {
+    padding-bottom: 9rem;
+}
+footer {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 9rem;
+}
+footer svg {
+    color: white;
+    margin-right: 0.5rem;
+    margin-left: 0.5rem;
+    height: 1.5rem !important;
+}
+#fb:hover {
+    color: #0866ff;
+}
+#tx:hover {
+    color: #000;
+}
+#ig:hover {
+    color: #d300c5;
+}
+#tt:hover {
+    color: #00f7ef;
+}
+#yt:hover {
+    color: #f00;
+}

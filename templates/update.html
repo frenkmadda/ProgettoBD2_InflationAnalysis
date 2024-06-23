@@ -5,8 +5,8 @@
     <title>Modifica documento</title>
 </head>
 <body>
+<div class="page-container">
 {% include "navbar.html" %}
-
 <div class="container">
     <h1 class="mb-4">Modifica documento</h1>
     <form method="post">
@@ -21,7 +21,8 @@
         <button type="submit" class="btn btn-primary">Aggiorna</button>
     </form>
 </div>
-
+{% include "footer.html" %}
+</div>
 <script>
     document.addEventListener("DOMContentLoaded", (event) => {
     const myForm = document.querySelector('form');
