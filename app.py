@@ -265,8 +265,8 @@ def serve_css(path: str) -> Response:
 
 
 @app.get('/img/<path>')
-def serve_imgs(path: str) -> Response:
-    return send_from_directory('static/img', escape(path), mimetype='image/jpg')
+def serve_image(path: str) -> Response:
+    return send_from_directory('static/img', escape(path), mimetype='image/jpeg')
 
 
 @app.get('/favicon.png')

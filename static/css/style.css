@@ -1,6 +1,7 @@
 .navbar {
     margin-bottom: 1rem;
 }
+
 #flag {
     width: 3rem;
     margin-left: 0.5rem;
@@ -13,4 +14,15 @@
 }
 .card-body p {
     line-height: normal;
+}
+
+.card {
+    overflow: hidden;
+}
+.card-img-top {
+    transition: transform .25s;
+}
+.card-img-top:hover {
+    cursor: pointer;
+    transform: scale(1.1);
 }

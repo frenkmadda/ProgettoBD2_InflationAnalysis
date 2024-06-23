@@ -3,13 +3,19 @@
 <head>
     {% include "head.html" %}
     <title>Home</title>
+    <style>
+        .navbar {
+            margin-bottom: 0;
+        }
+    </style>
 </head>
 <body>
 {% include "navbar.html" %}
 <div class="container">
-    <div class="row">
+    <div class="row mb-3">
         <div class="col-sm-4 mt-3">
             <div class="card h-100">
+                <img src="/img/db.jpg" class="card-img-top" alt="Immagine Operazioni CRUD">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">Operazioni CRUD</h5>
                     <p class="card-text mb-auto">Permette di eseguire le quattro operazioni basilari sui dataset.</p>
@@ -20,6 +26,7 @@
 
         <div class="col-sm-4 mt-3">
             <div class="card h-100">
+                <img src="/img/max.jpg" class="card-img-top" alt="Immagine Inflazione massima">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">Inflazione massima</h5>
                     <p class="card-text mb-auto">Trova il paese con inflazione massima per un determinato anno.</p>
@@ -30,6 +37,7 @@
 
         <div class="col-sm-4 mt-3">
             <div class="card h-100">
+                <img src="/img/countries.jpg" class="card-img-top" alt="Immagine Inflazione per paese">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">Inflazione per paese</h5>
                     <p class="card-text mb-auto">Visualizza l'inflazione annuale di un determinato paese.</p>
@@ -40,6 +48,7 @@
 
         <div class="col-sm-4 mt-3">
             <div class="card h-100">
+                <img src="/img/eu.jpg" class="card-img-top" alt="Immagine Inflazione Europea">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">Inflazione Europea</h5>
                     <p class="card-text mb-auto">Visualizza l'inflazione annuale nei paesi dell'Unione Europea.</p>
@@ -50,6 +59,7 @@
 
         <div class="col-sm-4 mt-3">
             <div class="card h-100">
+                <img src="/img/mean.jpg" class="card-img-top" alt="Immagine Inflazione media">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">Inflazione media</h5>
                     <p class="card-text mb-auto">Visualizza l'inflazione media di un determinato paese.</p>
@@ -60,6 +70,7 @@
 
         <div class="col-sm-4 mt-3">
             <div class="card h-100">
+                <img src="/img/food.jpg" class="card-img-top" alt="Immagine Inflazione alimentare">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">Inflazione alimentare</h5>
                     <p class="card-text mb-auto">Visualizza l'inflazione alimentare annua di un determinato paese.</p>
@@ -72,8 +83,16 @@
 <script>
     document.addEventListener("DOMContentLoaded", (event) => {
         document.querySelectorAll('.card').forEach((card) => {
+            let anchor = card.querySelector('a');
+
+            // Aggiunge il testo al pulsante di ogni card
             const title = card.querySelector('.card-title').textContent;
-            card.querySelector('a').textContent = `Vai a ${title}`;
+            anchor.textContent = `Vai a ${title}`;
+
+            // Reindirizza alla pagina corrispondente al click sull'immagine
+            card.querySelector('img').addEventListener('click', () => {
+                window.location.href = anchor.href;
+            });
         });
     });
 </script>
