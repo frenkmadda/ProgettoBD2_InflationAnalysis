@@ -57,7 +57,6 @@
             if (!graphs)
                 return;
 
-            console.log(graphs);
             Plotly.newPlot('graph', graphs, {});
             document.getElementById('mes').innerText = "Inflazione annua di: {{ paese }}";
             {% if ccode %}

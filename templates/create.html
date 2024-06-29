@@ -43,6 +43,18 @@
         </div>
     </form>
 </div>
+    <div class="toast-container bottom-0 start-0 mb-3 ms-2">
+    <div aria-atomic="true" aria-live="assertive" class="toast align-items-center text-bg-danger border-0" id="error-toast"
+         role="alert">
+        <div class="d-flex">
+            <div class="toast-body">
+                L'anno deve essere compreso tra 1980 e 2024
+            </div>
+            <button aria-label="Close" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    type="button"></button>
+        </div>
+    </div>
+    </div>
 {% include "footer.html" %}
 </div>
 <script>
@@ -52,6 +64,12 @@
         const myForm = document.getElementById('form');
         document.getElementById('btn-submit').addEventListener('click', function(event) {
             event.preventDefault();
+            let y = document.querySelector('#year').value;
+            if (y < 1980 || y > 2024) {
+                bootstrap.Toast.getOrCreateInstance(document.getElementById('error-toast')).show();
+                return;
+            }
+
             let collection_name = document.querySelector('#collection_name').value;
             let country_name = document.querySelector('#country_name').value;
             let inflation_value = document.querySelector('#inflation_value').value;

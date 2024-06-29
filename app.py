@@ -199,7 +199,7 @@ def serve_food_infl() -> str:
         ccode = get_ccode(country)
         return render_template('food-infl.html', graph=graph, countries=countries, paese=country, ccode=ccode)
     else:
-        return render_template('food-infl.html', countries=countries)
+        return render_template('food-infl.html', graph='null', countries=countries)
 
 
 @app.get('/eu-g7')
