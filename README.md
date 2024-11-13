@@ -16,4 +16,3 @@ graphical visualizations for better understanding.
 Group members:
 - Francesco Maddaloni
 - [Giovanni Donisi](https://github.com/gdonisi)
-- [Andrea Pascale](https://github.com/AndreaPascale)
